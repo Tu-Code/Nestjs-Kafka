@@ -1,8 +1,19 @@
 import { Injectable } from '@nestjs/common';
+import { ProducerService } from './kafka/producer.service';
 
 @Injectable()
 export class AppService {
-  getHello(): string {
+  constructor(private readonly producerService: ProducerService){}
+
+  async getHello() {
+    await this.producerService.produce({
+      topic: 'test',
+      messages: [
+        {
+          value: 'Hello world',
+        }
+      ]
+    })
     return 'Hello World!';
   }
 }
