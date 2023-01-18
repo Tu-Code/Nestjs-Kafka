@@ -1,7 +1,7 @@
 import { Logger } from "@nestjs/common";
 import { Consumer, ConsumerConfig, ConsumerSubscribeTopic, Kafka, KafkaMessage } from "kafkajs";
 import { IConsumer } from "./consumer.interface";
-import { sleep } from "./sleep";
+import { sleep } from "../sleep";
 import * as retry from 'async-retry';
 import { DatabaseService } from "src/database/database.service";
 
@@ -45,8 +45,8 @@ export class KafkajsConsumer implements IConsumer{
                         retries: 3, 
                         onRetry: (error, attempt) => 
                             this.logger.error(
-                                `Error consuming message, executing retry after ${attempt}/3`,
-                        error
+                            `Error consuming message, executing retry after ${attempt}/3`,
+                            error
                         ),
                     });
                 } catch (err) {
