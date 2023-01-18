@@ -29,7 +29,7 @@ export class KafkajsConsumer implements IConsumer{
         }
     }
 
-    async disconect(){
+    async disconnect(){
         await this.consumer.disconnect();
     }    
 
@@ -39,9 +39,23 @@ export class KafkajsConsumer implements IConsumer{
             eachMessage: async({ message, partition }) => {
                 this.logger.debug(`Processing message partition: ${partition}`);
                 try {
-                    await retry(async () => onMessage(message), { retries: 3 });
-                } catch (err) {}
+                    await retry(async () => onMessage(message), {
+                        retries: 3, 
+                        onRetry: (error, attempt) => 
+                            this.logger.error(
+                                `Error consuming message, executing retry after ${attempt}/3`,
+                        error
+                        ),
+                    });
+                } catch (err) {
+                    this.logger.error('Error consuming message. Adding to DLQ...', err);
+                    await this.addMessageToDlq(message);
+                }
             }
         })
+    }
+
+    private async addMessageToDlq(message: KafkaMessage){
+
     }
 }
