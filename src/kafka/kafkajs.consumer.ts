@@ -3,6 +3,7 @@ import { Consumer, ConsumerConfig, ConsumerSubscribeTopic, Kafka, KafkaMessage }
 import { IConsumer } from "./consumer.interface";
 import { sleep } from "./sleep";
 import * as retry from 'async-retry';
+import { DatabaseService } from "src/database/database.service";
 
 export class KafkajsConsumer implements IConsumer{
     private readonly kafka: Kafka;
@@ -11,6 +12,7 @@ export class KafkajsConsumer implements IConsumer{
 
     constructor(
         private readonly topic: ConsumerSubscribeTopic,
+        private readonly databaseService: DatabaseService,
         config: ConsumerConfig,
         broker: string
     ) {
@@ -56,6 +58,9 @@ export class KafkajsConsumer implements IConsumer{
     }
 
     private async addMessageToDlq(message: KafkaMessage){
-
+        await this.databaseService.
+        getDbHandle().
+        collection('dlq').
+        insertOne({ value: message.value, topic: this.topic.topic })
     }
 }
